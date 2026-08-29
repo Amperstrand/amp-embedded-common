@@ -116,6 +116,41 @@ Not yet extracted (ccid SmartcardWrapper re-init pattern, esp32 MFRC522
 driver re-init). Decide at extraction time; cross-repo merges default to
 `GPL-2.0-or-later` unless every merged source is permissive.
 
+## Component: `amp-recovery` (Recovery utilities)
+
+**Decision: `GPL-2.0-or-later`.**
+
+### What was investigated
+
+Two extracted components from ccid-firmware-rs commit `76f1e8af929130f61b19daf2c8b045a083304d79`:
+1. `InitRecoveryTracker` (37 lines + 4 tests) from `firmware/esp32-ccid/src/mfrc522_driver.rs`
+2. USB OTG FS PHY reset sequence from `firmware/ccid-firmware/src/main.rs` (lines 610-664 for F469, 670-717 for F746)
+
+### Evidence trail (captured 2026-08-30)
+
+- `git log --follow -- firmware/esp32-ccid/src/mfrc522_driver.rs` shows the re-init
+  tracker was authored entirely inside ccid-firmware-rs.
+- USB PHY reset sequence is documented in ccid AGENTS.md as "sourced from the
+  microfips project" — but the actual inline implementation in ccid is
+  **ccid-original expression**. The AGENTS.md note describes the *pattern* provenance,
+  not a verbatim code copy from microfips (microfips declares no license anyway).
+- The 7-step sequence (RCC clock cycle, peripheral reset, core soft reset, PHY
+  power-cycle) and exact register addresses (0x5000_0000 + offsets) are ccid-authored.
+
+### Analysis
+
+Both `InitRecoveryTracker` and the USB PHY reset sequence are **ccid-original**
+expression, authored entirely within the `GPL-2.0-or-later` ccid-firmware-rs
+repository. While the PHY reset pattern was inspired by microfips (per ccid
+AGENTS.md), the actual implementation, register addresses, and timing constants
+are ccid-specific. Per the decision rule, this crate is **`GPL-2.0-or-later`**.
+
+### Conclusion
+
+**ccid-original** → **`GPL-2.0-or-later`**.
+
+---
+
 ## Component: usb-phy reset (placeholder)
 
 Not yet extracted (ccid issue #22 USB OTG FS PHY reset sequence; ccid AGENTS.md

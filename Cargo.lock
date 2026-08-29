@@ -9,3 +9,7 @@ version = "0.1.0"
 [[package]]
 name = "amp-dwt-watchdog"
 version = "0.1.0"
+
+[[package]]
+name = "amp-recovery"
+version = "0.1.0"

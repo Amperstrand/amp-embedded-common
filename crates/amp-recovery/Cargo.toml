@@ -1,0 +1,17 @@
+[package]
+name = "amp-recovery"
+version = "0.1.0"
+edition = "2021"
+description = "Recovery utilities for embedded firmware (Amperstrand shared embedded utility)"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/Amperstrand/amp-embedded-common"
+keywords = ["embedded", "no-std", "recovery", "usb"]
+categories = ["embedded", "no-std"]
+
+[features]
+default = []
+
+# Marker features for MCU builds. These add no code; they exist so MCU build/CI
+# commands can request the embedded configuration explicitly.
+stm32f4 = []
+stm32f7 = []
