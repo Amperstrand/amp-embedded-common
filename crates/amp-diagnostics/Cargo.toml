@@ -1,0 +1,12 @@
+[package]
+name = "amp-diagnostics"
+version = "0.1.0"
+edition = "2021"
+description = "Runtime diagnostics counters for CCID firmware (Amperstrand shared embedded utility)"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/Amperstrand/amp-embedded-common"
+keywords = ["embedded", "no-std", "ccid", "diagnostics"]
+categories = ["embedded", "no-std"]
+
+[features]
+default = []

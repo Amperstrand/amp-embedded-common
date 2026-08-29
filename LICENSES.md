@@ -79,11 +79,36 @@ crate without relicensing; it retains its own inline 8-line pattern
 (`1d7fddc`). ccid-firmware-rs (GPL) and future shared components whose
 licensing permits can consume it freely.
 
-## Component: diagnostics (placeholder)
+## Component: `amp-diagnostics` (Diagnostics counters)
 
-Not yet extracted (ccid `crates/ccid-core/src/diagnostics.rs`). Decide at
-extraction time: authored in the GPL ccid repo → presumed
-`GPL-2.0-or-later` unless permissive provenance is proven.
+**Decision: `GPL-2.0-or-later`.**
+
+### What was investigated
+
+`crates/ccid-core/src/diagnostics.rs` (264 lines, 12 tests) from ccid-firmware-rs
+commit `76f1e8af929130f61b19daf2c8b045a083304d79`.
+
+### Evidence trail (captured 2026-08-30)
+
+- `git log --follow -- crates/ccid-core/src/diagnostics.rs` shows file was authored
+  entirely inside ccid-firmware-rs (no external history crosses repo boundary).
+- File tracks runtime counters (apdu_tx/rx, nak, error, reinit, card_present,
+  uptime) with a frozen 28-byte little-endian wire format for CCID Escape 0xD0.
+- No external provenance claims in ccid AGENTS.md or commit messages.
+
+### Analysis
+
+The `Diagnostics` struct and its serialization functions are **ccid-original**
+expression, authored entirely within the `GPL-2.0-or-later` ccid-firmware-rs
+repository. The 28-byte wire format is a protocol design choice specific to
+the CCID Escape 0xD0 vendor command. Per the decision rule, this crate is
+**`GPL-2.0-or-later`**.
+
+### Conclusion
+
+**ccid-original** → **`GPL-2.0-or-later`**.
+
+---
 
 ## Component: recovery / self-healing (placeholder)
 

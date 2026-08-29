@@ -3,5 +3,9 @@
 version = 4
 
 [[package]]
+name = "amp-diagnostics"
+version = "0.1.0"
+
+[[package]]
 name = "amp-dwt-watchdog"
 version = "0.1.0"
