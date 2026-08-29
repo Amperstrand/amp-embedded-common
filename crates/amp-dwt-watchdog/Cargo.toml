@@ -1,0 +1,19 @@
+[package]
+name = "amp-dwt-watchdog"
+version = "0.1.0"
+edition = "2021"
+description = "DWT cycle-counter watchdog for Cortex-M3+ firmware (Amperstrand shared embedded utility)"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/Amperstrand/amp-embedded-common"
+keywords = ["embedded", "no-std", "cortex-m", "dwt", "watchdog"]
+categories = ["embedded", "no-std"]
+
+[features]
+default = []
+
+# Marker feature for MCU builds. The ARM DWT implementation is cfg-gated on
+# `all(target_arch = "arm", target_os = "none")` exactly as in ccid-firmware-rs
+# (host builds get the AtomicU32 test double instead). This feature adds no
+# code; it exists so MCU build/CI commands can request the embedded
+# configuration explicitly.
+cortex-m = []
