@@ -1,0 +1,17 @@
+# Minimal test reusable workflow
+name: Test Reusable
+
+on:
+  workflow_call:
+    inputs:
+      test_input:
+        description: "Test input"
+        required: false
+        type: string
+        default: "hello"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Input was: ${{ inputs.test_input }}"
