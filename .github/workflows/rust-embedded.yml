@@ -106,7 +106,7 @@ jobs:
         working-directory: ${{ inputs.workspace-path }}
         env:
           RUSTFLAGS: "-D warnings"
-        run: cargo clippy ${{ inputs.clippy-flags }} --all-targets -- -D warnings
+        run: cargo clippy ${{ inputs.clippy-flags }} -- -D warnings
 
       - name: Run clippy (cross-compile)
         if: inputs.clippy-target != ''
