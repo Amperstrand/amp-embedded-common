@@ -63,7 +63,6 @@ on:
         type: string
         default: "."
 
-    secrets: inherit
 
 env:
   CARGO_TERM_COLOR: always
