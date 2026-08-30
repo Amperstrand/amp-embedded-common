@@ -92,6 +92,9 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run clippy (host)
+        # Embedded crates with target-gated unsafe lint cleanly on their MCU
+        # target only; when clippy-target is set, that pass is authoritative.
+        if: inputs.clippy-target == ''
         working-directory: ${{ inputs.workspace-path }}
         env:
           RUSTFLAGS: "-D warnings"
