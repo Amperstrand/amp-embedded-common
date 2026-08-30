@@ -1,0 +1,133 @@
+# Reusable CI workflow for Amperstrand Rust embedded projects.
+#
+# This workflow provides common linting and host-test jobs that can be
+# consumed by ecosystem repos (bolty-rs, ccid-firmware-rs, gm65-scanner, etc.).
+#
+# Usage example:
+#   jobs:
+#     ci:
+#       uses: Amperstrand/amp-embedded-common/.github/workflows/rust-embedded.yml@main
+#       with:
+#         toolchain: "1.92"
+#         clippy-target: "thumbv7em-none-eabihf"
+#         apt-packages: "libpcsclite-dev"
+#         test-flags: "--workspace --exclude esp32-crate"
+
+name: Rust Embedded CI
+
+on:
+  workflow_call:
+    inputs:
+      # Rust toolchain version (e.g., "stable", "1.92", "nightly")
+      # Most repos pin to a specific version for stability.
+      toolchain:
+        description: "Rust toolchain version"
+        required: false
+        type: string
+        default: "stable"
+
+      # Optional cross-compile target for clippy (e.g., "thumbv7em-none-eabihf")
+      # If empty, clippy runs on the host target only.
+      clippy-target:
+        description: "Cross-compile target for clippy (empty = host only)"
+        required: false
+        type: string
+        default: ""
+
+      # Build target for host tests (default: x86_64-unknown-linux-gnu)
+      test-target:
+        description: "Build target for host tests"
+        required: false
+        type: string
+        default: "x86_64-unknown-linux-gnu"
+
+      # Space-separated apt packages to install (e.g., "libpcsclite-dev cmake ninja-build")
+      apt-packages:
+        description: "Space-separated apt packages to install"
+        required: false
+        type: string
+        default: ""
+
+      # Additional flags to pass to cargo test (e.g., "--workspace --exclude crate-name")
+      test-flags:
+        description: "Additional flags for cargo test"
+        required: false
+        type: string
+        default: ""
+
+      # Working directory path (default: "." for repo root)
+      # Set this if the workspace is in a subdirectory.
+      workspace-path:
+        description: "Working directory path (default: repo root)"
+        required: false
+        type: string
+        default: "."
+
+    secrets: inherit
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: Lint (fmt + clippy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ inputs.toolchain }}
+          components: rustfmt, clippy
+
+      - name: Install cross-compile target
+        if: inputs.clippy-target != ''
+        run: rustup target add ${{ inputs.clippy-target }}
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        working-directory: ${{ inputs.workspace-path }}
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy (host)
+        working-directory: ${{ inputs.workspace-path }}
+        env:
+          RUSTFLAGS: "-D warnings"
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run clippy (cross-compile)
+        if: inputs.clippy-target != ''
+        working-directory: ${{ inputs.workspace-path }}
+        env:
+          RUSTFLAGS: "-D warnings"
+        run: cargo clippy --target ${{ inputs.clippy-target }} -- -D warnings
+
+  host-test:
+    name: Host Tests
+    runs-on: ubuntu-latest
+    env:
+      CARGO_BUILD_TARGET: ${{ inputs.test-target }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ inputs.toolchain }}
+          targets: ${{ inputs.test-target }}
+
+      - name: Install system dependencies
+        if: inputs.apt-packages != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ inputs.apt-packages }}
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run workspace tests
+        working-directory: ${{ inputs.workspace-path }}
+        run: cargo test --target ${{ inputs.test-target }} ${{ inputs.test-flags }}

@@ -1,3 +1,8 @@
+# CI workflow that uses the reusable rust-embedded.yml workflow.
+# This serves as both the repo's own CI and a live test of the reusable workflow.
+#
+# The reusable workflow is tested end-to-end on every push/PR.
+
 name: CI
 
 on:
@@ -10,55 +15,37 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    env:
-      RUSTFLAGS: "-D warnings"
-    steps:
-      - uses: actions/checkout@v5
+  ci:
+    name: CI (via reusable workflow)
+    # Use the reusable workflow with repo-specific values
+    uses: Amperstrand/amp-embedded-common/.github/workflows/rust-embedded.yml@main
+    with:
+      # Pin to 1.92 like ccid-firmware-rs (most embedded repos use specific versions)
+      toolchain: "1.92"
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: "1.92"
-          targets: thumbv7em-none-eabihf
-          components: rustfmt, clippy
+      # Clippy on thumbv7em-none-eabihf (common Cortex-M target)
+      clippy-target: "thumbv7em-none-eabihf"
 
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
+      # Host tests on x86_64 (the standard host target)
+      test-target: "x86_64-unknown-linux-gnu"
 
-      - name: Check formatting
-        run: cargo fmt --check
+      # No system dependencies needed for this simple library
+      apt-packages: ""
 
-      - name: Run clippy (thumbv7em, cortex-m)
-        run: cargo clippy --target thumbv7em-none-eabihf --features cortex-m -- -D warnings
+      # Test all workspace crates
+      test-flags: "--workspace"
 
-  host-test:
-    runs-on: ubuntu-latest
-    env:
-      CARGO_BUILD_TARGET: x86_64-unknown-linux-gnu
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: "1.92"
-          targets: x86_64-unknown-linux-gnu
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Run workspace tests
-        run: cargo test --workspace --target x86_64-unknown-linux-gnu
+      # Workspace is at repo root
+      workspace-path: "."
 
   thumbv7em-build:
+    name: Build for thumbv7em-none-eabihf
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: "1.92"
           targets: thumbv7em-none-eabihf
