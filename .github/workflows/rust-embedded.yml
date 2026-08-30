@@ -55,6 +55,14 @@ on:
         type: string
         default: ""
 
+      # Additional flags for cargo clippy (e.g., "--workspace --exclude firmware-crate").
+      # Firmware crates that only lint cleanly on their MCU target are excluded here.
+      clippy-flags:
+        description: "Additional flags for cargo clippy"
+        required: false
+        type: string
+        default: ""
+
       # Working directory path (default: "." for repo root)
       # Set this if the workspace is in a subdirectory.
       workspace-path:
@@ -98,14 +106,14 @@ jobs:
         working-directory: ${{ inputs.workspace-path }}
         env:
           RUSTFLAGS: "-D warnings"
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy ${{ inputs.clippy-flags }} --all-targets -- -D warnings
 
       - name: Run clippy (cross-compile)
         if: inputs.clippy-target != ''
         working-directory: ${{ inputs.workspace-path }}
         env:
           RUSTFLAGS: "-D warnings"
-        run: cargo clippy --target ${{ inputs.clippy-target }} -- -D warnings
+        run: cargo clippy ${{ inputs.clippy-flags }} --target ${{ inputs.clippy-target }} -- -D warnings
 
   host-test:
     name: Host Tests
