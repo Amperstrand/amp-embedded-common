@@ -1,0 +1,35 @@
+# Self-test workflow for the reusable rust-embedded.yml workflow.
+# This workflow calls the reusable workflow with the repo's own values
+# to prove it works end-to-end on GitHub Actions.
+
+name: CI Self-Test (reusable workflow)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  selftest:
+    name: Test reusable workflow
+    # Call the reusable workflow from this repo
+    uses: Amperstrand/amp-embedded-common/.github/workflows/rust-embedded.yml@main
+    with:
+      # Pin to 1.92 like ccid-firmware-rs (most embedded repos use specific versions)
+      toolchain: "1.92"
+
+      # Clippy on thumbv7em-none-eabihf (common Cortex-M target)
+      clippy-target: "thumbv7em-none-eabihf"
+
+      # Host tests on x86_64 (the standard host target)
+      test-target: "x86_64-unknown-linux-gnu"
+
+      # No system dependencies needed for this simple library
+      apt-packages: ""
+
+      # Test all workspace crates
+      test-flags: "--workspace"
+
+      # Workspace is at repo root
+      workspace-path: "."
