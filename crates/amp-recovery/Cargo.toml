@@ -8,10 +8,18 @@ repository = "https://github.com/Amperstrand/amp-embedded-common"
 keywords = ["embedded", "no-std", "recovery", "usb"]
 categories = ["embedded", "no-std"]
 
+[dependencies]
+
+# Optional MCU-specific dependencies (gated by features)
+# Versions match ccid-firmware-rs
+stm32f4xx-hal = { git = "https://github.com/Amperstrand/stm32f4xx-hal", rev = "05d999d600d457f99aeb23ff93275d2c8f998908", features = ["stm32f469"], optional = true }
+stm32f7xx-hal = { version = "0.8", features = ["stm32f746"], optional = true }
+cortex-m = { version = "0.7", features = ["inline-asm", "critical-section-single-core"], optional = true }
+
 [features]
 default = []
 
-# Marker features for MCU builds. These add no code; they exist so MCU build/CI
-# commands can request the embedded configuration explicitly.
-stm32f4 = []
-stm32f7 = []
+# MCU-specific features that pull in the required HAL dependencies
+# These add no code; they exist so MCU build/CI commands can request the embedded configuration explicitly
+stm32f4 = ["dep:stm32f4xx-hal", "dep:cortex-m"]
+stm32f7 = ["dep:stm32f7xx-hal", "dep:cortex-m"]
